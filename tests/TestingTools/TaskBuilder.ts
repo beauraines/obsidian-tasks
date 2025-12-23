@@ -277,7 +277,7 @@ export class TaskBuilder {
     }
 
     public doneDate(doneDate: string | null): this {
-        this._doneDate = TaskBuilder.parseDate(doneDate);
+        this._doneDate = TaskBuilder.parseDateTime(doneDate);
         return this;
     }
 
@@ -323,6 +323,14 @@ export class TaskBuilder {
     private static parseDate(date: string | null): Moment | null {
         if (date) {
             return DateParser.parseDate(date);
+        } else {
+            return null;
+        }
+    }
+
+    private static parseDateTime(date: string | null): Moment | null {
+        if (date) {
+            return DateParser.parseDateTime(date);
         } else {
             return null;
         }

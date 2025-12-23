@@ -405,7 +405,7 @@ export class Task extends ListItem {
             if (this.status.type !== statusType) {
                 // Set date only if setting value is true.
                 if (dateEnabledInSettings) {
-                    newDate = today;
+                    newDate = today.format(TaskRegularExpressions.dateTimeFormat);
                 }
             } else {
                 // This task was already in statusType, so preserve its existing date.

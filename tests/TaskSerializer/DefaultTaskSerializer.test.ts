@@ -14,6 +14,7 @@ import { TaskBuilder } from '../TestingTools/TaskBuilder';
 import { OnCompletion } from '../../src/Task/OnCompletion';
 import { Priority } from '../../src/Task/Priority';
 import { escapeInvisibleCharacters } from '../../src/lib/StringHelpers';
+import { TaskRegularExpressions } from '../../src/Task/TaskRegularExpressions';
 
 jest.mock('obsidian');
 window.moment = moment;
@@ -70,7 +71,7 @@ describe('validate emoji regular expressions', () => {
             createdDateRegex: /➕\\ufe0f? *(\\d{4}-\\d{2}-\\d{2})$/
             scheduledDateRegex: /(?:⏳|⌛)\\ufe0f? *(\\d{4}-\\d{2}-\\d{2})$/
             dueDateRegex: /(?:📅|📆|🗓)\\ufe0f? *(\\d{4}-\\d{2}-\\d{2})$/
-            doneDateRegex: /✅\\ufe0f? *(\\d{4}-\\d{2}-\\d{2})$/
+            doneDateRegex: /✅\\ufe0f? *(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2})$/
             cancelledDateRegex: /❌\\ufe0f? *(\\d{4}-\\d{2}-\\d{2})$/
             recurrenceRegex: /🔁\\ufe0f? *([a-zA-Z0-9, !]+)$/
             onCompletionRegex: /🏁\\ufe0f? *([a-zA-Z]+)$/
@@ -105,13 +106,25 @@ describe.each(symbolMap)("DefaultTaskSerializer with '$taskFormat' symbols", ({ 
             expect(taskDetails).toMatchTaskDetails({});
         });
 
+        describe('should parse date-times', () => {
+            it.each([{ what: 'doneDate', symbol: doneDateSymbol }] as const)(
+                'should parse a $what',
+                ({ what, symbol }) => {
+                    const taskDetails = deserialize(`${symbol} 2021-06-20T16:40`);
+                    expect(taskDetails).toMatchTaskDetails({
+                        [what]: moment('2021-06-20T16:40', TaskRegularExpressions.dateTimeFormat),
+                    });
+                },
+            );
+        });
+
         describe('should parse dates', () => {
             it.each([
                 { what: 'startDate', symbol: startDateSymbol },
                 { what: 'createdDate', symbol: createdDateSymbol },
                 { what: 'scheduledDate', symbol: scheduledDateSymbol },
                 { what: 'dueDate', symbol: dueDateSymbol },
-                { what: 'doneDate', symbol: doneDateSymbol },
+                // { what: 'doneDate', symbol: doneDateSymbol },
             ] as const)('should parse a $what', ({ what, symbol }) => {
                 const taskDetails = deserialize(`${symbol} 2021-06-20`);
                 expect(taskDetails).toMatchTaskDetails({ [what]: moment('2021-06-20', 'YYYY-MM-DD') });
@@ -276,12 +289,20 @@ describe.each(symbolMap)("DefaultTaskSerializer with '$taskFormat' symbols", ({ 
             expect(serialized).toEqual('');
         });
 
+        it.each([{ what: 'doneDate', symbol: doneDateSymbol }] as const)(
+            'should serialize a $what',
+            ({ what, symbol }) => {
+                const serialized = serialize(new TaskBuilder()[what]('2021-06-20T16:40Z').description('').build());
+                expect(serialized).toEqual(` ${symbol} 2021-06-20T16:40`);
+            },
+        );
+
         it.each([
             { what: 'startDate', symbol: startDateSymbol },
             { what: 'createdDate', symbol: createdDateSymbol },
             { what: 'scheduledDate', symbol: scheduledDateSymbol },
             { what: 'dueDate', symbol: dueDateSymbol },
-            { what: 'doneDate', symbol: doneDateSymbol },
+            // { what: 'doneDate', symbol: doneDateSymbol },
         ] as const)('should serialize a $what', ({ what, symbol }) => {
             const serialized = serialize(new TaskBuilder()[what]('2021-06-20').description('').build());
             expect(serialized).toEqual(` ${symbol} 2021-06-20`);

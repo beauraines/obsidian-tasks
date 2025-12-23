@@ -82,7 +82,7 @@ function summarizeTaskDetails(t: TaskDetails | null): SummarizedTaskDetails | nu
         createdDate: t.createdDate?.format(TaskRegularExpressions.dateFormat) ?? null,
         scheduledDate: t.scheduledDate?.format(TaskRegularExpressions.dateFormat) ?? null,
         dueDate: t.dueDate?.format(TaskRegularExpressions.dateFormat) ?? null,
-        doneDate: t.doneDate?.format(TaskRegularExpressions.dateFormat) ?? null,
+        doneDate: t.doneDate?.format(TaskRegularExpressions.dateTimeFormat) ?? null,
         cancelledDate: t.cancelledDate?.format(TaskRegularExpressions.dateFormat) ?? null,
         recurrence: t.recurrence?.toText() ?? null,
         id: t.id?.valueOf().toString() ?? null,

@@ -14,6 +14,15 @@ export class DateParser {
             .startOf('day');
     }
 
+    public static parseDateTime(input: string, forwardDate: boolean = false): Moment {
+        // Using start of day to correctly match on comparison with other dates (like equality).
+        return window.moment(
+            chrono.parseDate(input, undefined, {
+                forwardDate: forwardDate,
+            }),
+        );
+    }
+
     /**
      * Parse a line and extract a pair of dates, returned in a tuple, sorted by date.
      * @param input - any pair of dates, separate by one or more spaces '17 August 2013 19 August 2013',

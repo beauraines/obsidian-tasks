@@ -58,6 +58,10 @@ function dateFieldRegex(symbols: string) {
     return fieldRegex(symbols, '(\\d{4}-\\d{2}-\\d{2})');
 }
 
+function dateTimeFieldRegex(symbols: string) {
+    return fieldRegex(symbols, '(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2})');
+}
+
 function fieldRegex(symbols: string, valueRegexString: string) {
     // \uFE0F? allows an optional Variant Selector 16 on emojis.
     let source = symbols + '\uFE0F?';
@@ -100,7 +104,7 @@ export const DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
         createdDateRegex: dateFieldRegex('➕'),
         scheduledDateRegex: dateFieldRegex('(?:⏳|⌛)'),
         dueDateRegex: dateFieldRegex('(?:📅|📆|🗓)'),
-        doneDateRegex: dateFieldRegex('✅'),
+        doneDateRegex: dateTimeFieldRegex('✅'),
         cancelledDateRegex: dateFieldRegex('❌'),
         recurrenceRegex: fieldRegex('🔁', '([a-zA-Z0-9, !]+)'),
         onCompletionRegex: fieldRegex('🏁', '([a-zA-Z]+)'),
@@ -120,6 +124,14 @@ function symbolAndDateValue(shortMode: boolean, symbol: string, date: moment.Mom
     // but doing so would do some wasted date-formatting when in 'short mode',
     // so instead we repeat the check on shortMode value.
     return shortMode ? ' ' + symbol : ` ${symbol} ${date.format(TaskRegularExpressions.dateFormat)}`;
+}
+
+function symbolAndDateTimeValue(shortMode: boolean, symbol: string, date: moment.Moment | null) {
+    if (!date) return '';
+    // We could call symbolAndStringValue() to remove a little code repetition,
+    // but doing so would do some wasted date-formatting when in 'short mode',
+    // so instead we repeat the check on shortMode value.
+    return shortMode ? ' ' + symbol : ` ${symbol} ${date.format(TaskRegularExpressions.dateTimeFormat)}`;
 }
 
 export function allTaskPluginEmojis() {
@@ -207,7 +219,7 @@ export class DefaultTaskSerializer implements TaskSerializer {
                 if (task.scheduledDateIsInferred) return '';
                 return symbolAndDateValue(shortMode, scheduledDateSymbol, task.scheduledDate);
             case TaskLayoutComponent.DoneDate:
-                return symbolAndDateValue(shortMode, doneDateSymbol, task.doneDate);
+                return symbolAndDateTimeValue(shortMode, doneDateSymbol, task.doneDate);
             case TaskLayoutComponent.CancelledDate:
                 return symbolAndDateValue(shortMode, cancelledDateSymbol, task.cancelledDate);
             case TaskLayoutComponent.DueDate:
@@ -303,7 +315,7 @@ export class DefaultTaskSerializer implements TaskSerializer {
 
             const doneDateMatch = line.match(TaskFormatRegularExpressions.doneDateRegex);
             if (doneDateMatch !== null) {
-                doneDate = window.moment(doneDateMatch[1], TaskRegularExpressions.dateFormat);
+                doneDate = window.moment(doneDateMatch[1], TaskRegularExpressions.dateTimeFormat);
                 line = line.replace(TaskFormatRegularExpressions.doneDateRegex, '').trim();
                 matched = true;
             }
