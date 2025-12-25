@@ -64,6 +64,7 @@ describe('validate emoji regular expressions', () => {
     }
 
     it('regular expressions should have expected source', () => {
+        // These are defined in DefaultTaskSerializer.ts
         expect(generateRegexApprovalTest()).toMatchInlineSnapshot(`
             "
             priorityRegex: /(🔺|⏫|🔼|🔽|⏬)\\ufe0f?$/
@@ -71,7 +72,7 @@ describe('validate emoji regular expressions', () => {
             createdDateRegex: /➕\\ufe0f? *(\\d{4}-\\d{2}-\\d{2})$/
             scheduledDateRegex: /(?:⏳|⌛)\\ufe0f? *(\\d{4}-\\d{2}-\\d{2})$/
             dueDateRegex: /(?:📅|📆|🗓)\\ufe0f? *(\\d{4}-\\d{2}-\\d{2})$/
-            doneDateRegex: /✅\\ufe0f? *(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2})$/
+            doneDateRegex: /✅\\ufe0f? *(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2})$/
             cancelledDateRegex: /❌\\ufe0f? *(\\d{4}-\\d{2}-\\d{2})$/
             recurrenceRegex: /🔁\\ufe0f? *([a-zA-Z0-9, !]+)$/
             onCompletionRegex: /🏁\\ufe0f? *([a-zA-Z]+)$/
@@ -110,9 +111,14 @@ describe.each(symbolMap)("DefaultTaskSerializer with '$taskFormat' symbols", ({ 
             it.each([{ what: 'doneDate', symbol: doneDateSymbol }] as const)(
                 'should parse a $what',
                 ({ what, symbol }) => {
-                    const taskDetails = deserialize(`${symbol} 2021-06-20T16:40`);
+                    const taskDetails = deserialize(
+                        `${symbol} ${moment('2021-06-20T16:40').format(TaskRegularExpressions.dateTimeFormat)}`,
+                    );
                     expect(taskDetails).toMatchTaskDetails({
-                        [what]: moment('2021-06-20T16:40', TaskRegularExpressions.dateTimeFormat),
+                        [what]: moment(
+                            moment('2021-06-20T16:40').format(TaskRegularExpressions.dateTimeFormat),
+                            TaskRegularExpressions.dateTimeFormat,
+                        ),
                     });
                 },
             );
@@ -293,7 +299,9 @@ describe.each(symbolMap)("DefaultTaskSerializer with '$taskFormat' symbols", ({ 
             'should serialize a $what',
             ({ what, symbol }) => {
                 const serialized = serialize(new TaskBuilder()[what]('2021-06-20T16:40Z').description('').build());
-                expect(serialized).toEqual(` ${symbol} 2021-06-20T16:40`);
+                expect(serialized).toEqual(
+                    ` ${symbol} ${moment('2021-06-20T16:40').format(TaskRegularExpressions.dateTimeFormat)}`,
+                );
             },
         );
 
