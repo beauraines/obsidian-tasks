@@ -130,7 +130,7 @@ export class TaskBuilder {
             .startDate('2023-07-02')
             .scheduledDate('2023-07-03')
             .dueDate('2023-07-04')
-            .doneDate('2023-07-05')
+            .doneDate('2023-07-05T17:30')
             .cancelledDate('2023-07-06')
             .onCompletion(OnCompletion.Delete)
             .dependsOn(['123456', 'abc123'])
