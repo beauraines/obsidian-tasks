@@ -59,7 +59,7 @@ function dateFieldRegex(symbols: string) {
 }
 
 function dateTimeFieldRegex(symbols: string) {
-    return fieldRegex(symbols, '(\\d{4}-\\d{2}-\\\d{2}(?:T| )?(?:\\d{2}:\\d{2})?)');
+    return fieldRegex(symbols, '(\\d{4}-\\d{2}-\\d{2}(?:(?:T| )\\d{2}:\\d{2})?(?:\:\\d{2})?)');
 }
 
 function fieldRegex(symbols: string, valueRegexString: string) {

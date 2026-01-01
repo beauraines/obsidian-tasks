@@ -72,7 +72,7 @@ describe('validate emoji regular expressions', () => {
             createdDateRegex: /➕\\ufe0f? *(\\d{4}-\\d{2}-\\d{2})$/
             scheduledDateRegex: /(?:⏳|⌛)\\ufe0f? *(\\d{4}-\\d{2}-\\d{2})$/
             dueDateRegex: /(?:📅|📆|🗓)\\ufe0f? *(\\d{4}-\\d{2}-\\d{2})$/
-            doneDateRegex: /✅\\ufe0f? *(\\d{4}-\\d{2}-\\d{2}(?:T| )?(?:\\d{2}:\\d{2})?)$/
+            doneDateRegex: /✅\\ufe0f? *(\\d{4}-\\d{2}-\\d{2}(?:(?:T| )\\d{2}:\\d{2})?(?:\:\\d{2})?)$/
             cancelledDateRegex: /❌\\ufe0f? *(\\d{4}-\\d{2}-\\d{2})$/
             recurrenceRegex: /🔁\\ufe0f? *([a-zA-Z0-9, !]+)$/
             onCompletionRegex: /🏁\\ufe0f? *([a-zA-Z]+)$/
