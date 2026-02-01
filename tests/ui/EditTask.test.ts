@@ -15,6 +15,12 @@ import { verifyAllCombinations3Async } from '../TestingTools/CombinationApproval
 import { prettifyHTML } from '../TestingTools/HTMLHelpers';
 import { TaskBuilder } from '../TestingTools/TaskBuilder';
 import {
+    DEFAULT_SYMBOLS,
+    // type DefaultTaskSerializerSymbols,
+    // allTaskPluginEmojis,
+} from '../../src/TaskSerializer/DefaultTaskSerializer';
+import { TaskRegularExpressions } from '../../src/Task/TaskRegularExpressions';
+import {
     getAndCheckApplyButton,
     getAndCheckRenderedDescriptionElement,
     getAndCheckRenderedElement,
@@ -563,7 +569,21 @@ describe('Task editing', () => {
         });
 
         it('should edit and save done date', async () => {
-            expect(await editFieldAndSave(line, 'done', '2024-01-01')).toEqual('- [ ] simple ✅ 2024-01-01');
+            // This test is testing the ability to edit a task AND render it.
+            // As written, this expect doesn't respect the Serializer, coupling the edit and the serializing
+
+            // ORIGINAL
+            // expect(await editFieldAndSave(line, 'done', '2024-01-01')).toEqual('- [ ] simple ✅ 2024-01-01');
+
+            // TODO figure out why moment is defaulting to noon not midnight
+            const newDoneDate = '2024-01-01 14:00';
+            const doneSymbol = DEFAULT_SYMBOLS.doneDateSymbol;
+
+            const expected = `${line} ${doneSymbol} ${moment(newDoneDate).format(
+                TaskRegularExpressions.dateTimeFormat,
+            )}`;
+
+            expect(await editFieldAndSave(line, 'done', newDoneDate)).toEqual(expected);
         });
 
         it('should edit and save due date', async () => {
