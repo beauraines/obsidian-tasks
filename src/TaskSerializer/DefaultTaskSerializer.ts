@@ -66,6 +66,11 @@ function dateFieldRegex(symbols: string) {
     return fieldRegex(symbols, '(\\d{4}-\\d{2}-\\d{2})');
 }
 
+// TODO add unit test for this function
+function dateTimeFieldRegex(symbols: string) {
+    return fieldRegex(symbols, '(\\d{4}-\\d{2}-\\d{2})');
+}
+
 function fieldRegex(symbols: string, valueRegexString: string) {
     // \uFE0F? allows an optional Variant Selector 16 on emojis.
     let source = symbols + '\uFE0F?';
@@ -297,6 +302,16 @@ export class DefaultTaskSerializer implements TaskSerializer {
     public deserialize(line: string): TaskDetails {
         const { TaskFormatRegularExpressions } = this.symbols;
 
+        // Dynamically select the correct doneDate regex based on runtime settings
+        // Import lazily to avoid circular dependency during module initialization
+        // Only override for DEFAULT_SYMBOLS; other symbol sets (like DATAVIEW_SYMBOLS) have their own regex
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { happensFieldTimeEnabled } = require('../Config/Settings');
+        let doneDateRegex = TaskFormatRegularExpressions.doneDateRegex;
+        if (this.symbols === DEFAULT_SYMBOLS && happensFieldTimeEnabled('doneDate')) {
+            doneDateRegex = dateTimeFieldRegex('✅');
+        }
+
         // Keep matching and removing special strings from the end of the
         // description in any order. The loop should only run once if the
         // strings are in the expected order after the description.
@@ -330,7 +345,7 @@ export class DefaultTaskSerializer implements TaskSerializer {
                 priority = this.parsePriority(match[1]);
             });
 
-            this.extractDateField(state, TaskFormatRegularExpressions.doneDateRegex, (d) => (doneDate = d));
+            this.extractDateField(state, doneDateRegex, (d) => (doneDate = d));
             this.extractDateField(state, TaskFormatRegularExpressions.cancelledDateRegex, (d) => (cancelledDate = d));
             this.extractDateField(state, TaskFormatRegularExpressions.dueDateRegex, (d) => (dueDate = d));
             this.extractDateField(state, TaskFormatRegularExpressions.scheduledDateRegex, (d) => (scheduledDate = d));
