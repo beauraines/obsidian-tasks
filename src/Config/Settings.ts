@@ -78,6 +78,7 @@ export interface Settings {
     useFilenameAsScheduledDate: boolean;
     filenameAsScheduledDateFormat: string;
     filenameAsDateFolders: string[];
+    timeEnabledHappensFields: string[];
     recurrenceOnNextLine: boolean;
     removeScheduledDateOnRecurrence: boolean;
 
@@ -117,6 +118,7 @@ const defaultSettings: Readonly<Settings> = {
     useFilenameAsScheduledDate: false,
     filenameAsScheduledDateFormat: '',
     filenameAsDateFolders: [],
+    timeEnabledHappensFields: [],
     recurrenceOnNextLine: false,
     removeScheduledDateOnRecurrence: false,
     statusSettings: new StatusSettings(),
@@ -254,6 +256,18 @@ export const toggleFeature = (internalName: string, enabled: boolean): FeatureFl
  */
 export function getUserSelectedTaskFormat(): TaskFormat {
     return TASK_FORMATS[getSettings().taskFormat];
+}
+
+/**
+ * Checks if a date/time field is enabled in settings.
+ *
+ * @param field the field name to check (e.g., 'doneDate')
+ * @returns true if the field is enabled in timeEnabledHappensFields, false otherwise
+ */
+export function happensFieldTimeEnabled(field: string): boolean {
+    const settings = getSettings();
+    const timeEnabledHappensFields = settings.timeEnabledHappensFields ?? [];
+    return Array.isArray(timeEnabledHappensFields) && timeEnabledHappensFields.includes(field);
 }
 
 /**

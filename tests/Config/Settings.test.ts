@@ -1,7 +1,14 @@
 /**
  * @jest-environment jsdom
  */
-import { getSettings, isFeatureEnabled, resetSettings, toggleFeature, updateSettings } from '../../src/Config/Settings';
+import {
+    getSettings,
+    happensFieldTimeEnabled,
+    isFeatureEnabled,
+    resetSettings,
+    toggleFeature,
+    updateSettings,
+} from '../../src/Config/Settings';
 import { defaultPresets } from '../../src/Query/Presets/Presets';
 
 beforeEach(() => {
@@ -18,6 +25,14 @@ describe('settings-usage', () => {
 
         expect(Object.entries(currentSettings.features).length).toBeGreaterThan(0);
         expect(currentSettings.features['INTERNAL_TESTING_ENABLED_BY_DEFAULT']).toBe(true);
+    });
+
+    it('should have timeEnabledHappensFields property', () => {
+        const currentSettings = getSettings();
+
+        expect(currentSettings).toHaveProperty('timeEnabledHappensFields');
+        expect(Array.isArray(currentSettings.timeEnabledHappensFields)).toBe(true);
+        expect(currentSettings.timeEnabledHappensFields).toEqual([]);
     });
 
     it('returns true if feature enabled', () => {
@@ -163,5 +178,66 @@ describe('settings migration', () => {
         expect(currentSettings.globalFilter).toBe('test filter');
         // presets should be the default empty object
         expect(currentSettings.presets).toEqual(defaultPresets);
+    });
+});
+
+describe('happensFieldTimeEnabled', () => {
+    it('should return false when timeEnabledHappensFields is empty', () => {
+        // Arrange: Default settings with empty timeEnabledHappensFields
+        resetSettings();
+
+        // Act & Assert
+        expect(happensFieldTimeEnabled('doneDate')).toBe(false);
+        expect(happensFieldTimeEnabled('startDate')).toBe(false);
+    });
+
+    it('should return true when field is in timeEnabledHappensFields', () => {
+        // Arrange
+        updateSettings({ timeEnabledHappensFields: ['doneDate', 'startDate'] });
+
+        // Act & Assert
+        expect(happensFieldTimeEnabled('doneDate')).toBe(true);
+        expect(happensFieldTimeEnabled('startDate')).toBe(true);
+    });
+
+    it('should return false when field is not in timeEnabledHappensFields', () => {
+        // Arrange
+        updateSettings({ timeEnabledHappensFields: ['doneDate'] });
+
+        // Act & Assert
+        expect(happensFieldTimeEnabled('startDate')).toBe(false);
+        expect(happensFieldTimeEnabled('scheduledDate')).toBe(false);
+    });
+
+    it('should handle case-sensitive field matching', () => {
+        // Arrange
+        updateSettings({ timeEnabledHappensFields: ['doneDate'] });
+
+        // Act & Assert
+        expect(happensFieldTimeEnabled('doneDate')).toBe(true);
+        expect(happensFieldTimeEnabled('donedate')).toBe(false);
+        expect(happensFieldTimeEnabled('DoneDate')).toBe(false);
+    });
+
+    it('should return false when timeEnabledHappensFields is null or undefined', () => {
+        // Arrange: Update with null (should fall back to empty array)
+        updateSettings({ timeEnabledHappensFields: null as any });
+
+        // Act & Assert
+        expect(happensFieldTimeEnabled('doneDate')).toBe(false);
+    });
+
+    it('should handle multiple fields in timeEnabledHappensFields', () => {
+        // Arrange
+        updateSettings({
+            timeEnabledHappensFields: ['doneDate', 'createdDate', 'cancelledDate', 'startDate'],
+        });
+
+        // Act & Assert
+        expect(happensFieldTimeEnabled('doneDate')).toBe(true);
+        expect(happensFieldTimeEnabled('createdDate')).toBe(true);
+        expect(happensFieldTimeEnabled('cancelledDate')).toBe(true);
+        expect(happensFieldTimeEnabled('startDate')).toBe(true);
+        expect(happensFieldTimeEnabled('scheduledDate')).toBe(false);
     });
 });
