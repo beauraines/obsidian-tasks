@@ -861,6 +861,26 @@ describe('toggle done', () => {
         expect(toggled.doneDate).toBeNull();
     });
 
+    it('should add time to done date in completed task, regardless of settings', () => {
+        // Arrange
+        jest.useFakeTimers();
+        const dateTime = "2025-03-02T12:42";
+        const expectedDoneDateTime = moment(dateTime);
+        jest.setSystemTime(new Date(dateTime));
+        const task = new TaskBuilder().build();
+        updateSettings({ dateFields: {
+            doneDate: { includeTime: false}
+        } });
+
+        // Act
+        const tasks = task.toggle();
+
+        // Assert
+        expect(tasks.length).toEqual(1);
+        const toggled: Task = tasks[0];
+        expect(toggled.doneDate).toEqualMoment(expectedDoneDateTime);
+    });
+
     type RecurrenceCase = {
         // inputs:
         interval: string;
