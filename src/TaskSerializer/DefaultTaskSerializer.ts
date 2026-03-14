@@ -7,6 +7,7 @@ import { Task } from '../Task/Task';
 import { Priority } from '../Task/Priority';
 import { TaskRegularExpressions } from '../Task/TaskRegularExpressions';
 import type { TaskDetails, TaskSerializer } from '.';
+import { getSettings } from '../Config/Settings';
 
 /* Interface describing the symbols that {@link DefaultTaskSerializer}
  * uses to serialize and deserialize tasks.
@@ -122,12 +123,13 @@ function symbolAndStringValue(shortMode: boolean, symbol: string, value: string)
     return shortMode ? ' ' + symbol : ` ${symbol} ${value}`;
 }
 
-function symbolAndDateValue(shortMode: boolean, symbol: string, date: moment.Moment | null) {
+function symbolAndDateValue(shortMode: boolean, symbol: string, date: moment.Moment | null, _includeTime : boolean = false  ) {
     if (!date) return '';
     // We could call symbolAndStringValue() to remove a little code repetition,
     // but doing so would do some wasted date-formatting when in 'short mode',
     // so instead we repeat the check on shortMode value.
-    return shortMode ? ' ' + symbol : ` ${symbol} ${date.format(TaskRegularExpressions.dateFormat)}`;
+    const format = _includeTime ? TaskRegularExpressions. dateTimeFormat : TaskRegularExpressions.dateFormat;
+    return shortMode ? ' ' + symbol : ` ${symbol} ${date.format(format)}`;
 }
 
 export function allTaskPluginEmojis() {
@@ -215,7 +217,8 @@ export class DefaultTaskSerializer implements TaskSerializer {
                 if (task.scheduledDateIsInferred) return '';
                 return symbolAndDateValue(shortMode, scheduledDateSymbol, task.scheduledDate);
             case TaskLayoutComponent.DoneDate:
-                return symbolAndDateValue(shortMode, doneDateSymbol, task.doneDate);
+                const includeTime = getSettings().dateFields.doneDate.includeTime;
+                return symbolAndDateValue(shortMode, doneDateSymbol, task.doneDate, includeTime);
             case TaskLayoutComponent.CancelledDate:
                 return symbolAndDateValue(shortMode, cancelledDateSymbol, task.cancelledDate);
             case TaskLayoutComponent.DueDate:
