@@ -864,13 +864,15 @@ describe('toggle done', () => {
     it('should add time to done date in completed task, regardless of settings', () => {
         // Arrange
         jest.useFakeTimers();
-        const dateTime = "2025-03-02T12:42";
+        const dateTime = '2025-03-02T12:42';
         const expectedDoneDateTime = moment(dateTime);
         jest.setSystemTime(new Date(dateTime));
         const task = new TaskBuilder().build();
-        updateSettings({ dateFields: {
-            doneDate: { includeTime: false}
-        } });
+        updateSettings({
+            dateFields: {
+                doneDate: { includeTime: false },
+            },
+        });
 
         // Act
         const tasks = task.toggle();
