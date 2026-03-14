@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import moment from 'moment';
-import type { Settings } from '../../src/Config/Settings';
+import { type Settings, updateSettings } from '../../src/Config/Settings';
 import { DefaultTaskSerializer } from '../../src/TaskSerializer';
 import { RecurrenceBuilder } from '../TestingTools/RecurrenceBuilder';
 import {
@@ -285,6 +285,17 @@ describe.each(symbolMap)("DefaultTaskSerializer with '$taskFormat' symbols", ({ 
         ] as const)('should serialize a $what', ({ what, symbol }) => {
             const serialized = serialize(new TaskBuilder()[what]('2021-06-20').description('').build());
             expect(serialized).toEqual(` ${symbol} 2021-06-20`);
+        });
+
+        it.failing('should serialize a doneDate with a time, if setting is enabled', () => {
+            updateSettings({
+                dateFields: {
+                    doneDate: { includeTime: true },
+                },
+            });
+            const task = new TaskBuilder().doneDate('2021-06-20 13:42').description('').build();
+            const serialized = serialize(task);
+            expect(serialized).toEqual(` ${doneDateSymbol} 2021-06-20 13:42`);
         });
 
         it('should serialize a Highest, High, Medium, Low and Lowest priority', () => {
