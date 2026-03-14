@@ -12,6 +12,23 @@ afterEach(() => {
     resetSettings();
 });
 
+describe('date fields settings', () => {
+    it('should disable times on doneDate', () => {
+        const currentSettings = getSettings();
+        expect(currentSettings.dateFields.doneDate.includeTime).toEqual(false);
+    });
+
+    it('should allow times on doneDate to be enabled', () => {
+        updateSettings({
+            dateFields: {
+                doneDate: { includeTime: true },
+            },
+        });
+        const currentSettings = getSettings();
+        expect(currentSettings.dateFields.doneDate.includeTime).toEqual(true);
+    });
+});
+
 describe('settings-usage', () => {
     it('load default settings and validate features', () => {
         const currentSettings = getSettings();

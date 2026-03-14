@@ -23,6 +23,11 @@ interface SettingsMap {
     [key: string]: string | boolean;
 }
 
+export interface DateFieldSettings {
+    // This is extensible for future changes to dates, e.g. formatting.
+    includeTime: boolean;
+}
+
 export type HeadingState = {
     [id: string]: boolean;
 };
@@ -84,6 +89,12 @@ export interface Settings {
     // The custom status states.
     statusSettings: StatusSettings;
 
+    // date Fields
+    dateFields: {
+        // When date fields become customizable, add them here.
+        doneDate: DateFieldSettings;
+    };
+
     // Edit modal field render settings.
     isShownInEditModal: EditModalShowSettings;
 
@@ -120,6 +131,9 @@ const defaultSettings: Readonly<Settings> = {
     recurrenceOnNextLine: false,
     removeScheduledDateOnRecurrence: false,
     statusSettings: new StatusSettings(),
+    dateFields: {
+        doneDate: { includeTime: false },
+    },
     isShownInEditModal: defaultEditModalShowSettings,
     features: Feature.settingsFlags,
     generalSettings: {
