@@ -293,6 +293,13 @@ describe.each(symbolMap)("DefaultTaskSerializer with '$taskFormat' symbols", ({ 
                     doneDate: { includeTime: true },
                 },
             });
+            // The TaskBuilder().doneDate() function calls DateParser.parseDate()
+            // which uses Moment.startOfDay(), thus trimming the time.
+            // This is why our test has a time format, but its 00:00
+            //
+            //     Expected: " ✅ 2021-06-20 13:42"
+            //     Received: " ✅ 2021-06-20 00:00"
+
             const task = new TaskBuilder().doneDate('2021-06-20 13:42').description('').build();
             const serialized = serialize(task);
             expect(serialized).toEqual(` ${doneDateSymbol} 2021-06-20 13:42`);
